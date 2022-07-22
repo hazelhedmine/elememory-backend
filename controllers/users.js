@@ -7,8 +7,14 @@ usersRouter.get('/', async (request, response) => {
   response.json(users)
 })
 
-usersRouter.post('/', async (request, response) => {
-  const { username, name, password } = request.body
+usersRouter.post('/', async (request, response, next) => {
+  const { username, firstName, lastName, password } = request.body
+
+  if (!password) {
+    return response.status(400).json({
+      error: 'invalid password',
+    })
+  }
 
   const existingUser = await User.findOne({ username })
   if (existingUser) {
@@ -22,13 +28,17 @@ usersRouter.post('/', async (request, response) => {
 
   const user = new User({
     username,
-    name,
+    firstName,
+    lastName,
     passwordHash,
   })
 
-  const savedUser = await user.save()
-
-  response.status(201).json(savedUser)
+  user
+    .save()
+    .then((savedUser) => {
+      response.status(201).json(savedUser)
+    })
+    .catch((error) => next(error))
 })
 
 module.exports = usersRouter
