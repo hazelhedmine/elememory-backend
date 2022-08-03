@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const Deck = require('../models/deck')
 
 const initialUsers = [
   {
@@ -20,4 +21,14 @@ const usersInDb = async () => {
   return users.map((u) => u.toJSON())
 }
 
-module.exports = { initialUsers, usersInDb }
+const decksInDb = async () => {
+  const decks = await Deck.find({})
+  return decks.map((d) => d.toJSON())
+}
+
+const getUserId = async (username) => {
+  const users = await User.find({})
+  return users.find((user) => user.username === username)
+}
+
+module.exports = { initialUsers, usersInDb, decksInDb, getUserId }

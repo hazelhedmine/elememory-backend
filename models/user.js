@@ -14,6 +14,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  decks: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Deck',
+    },
+  ],
 })
 
 userSchema.set('toJSON', {

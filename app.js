@@ -4,6 +4,8 @@ const app = express()
 const cors = require('cors')
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
+const decksRouter = require('./controllers/decks')
+const cardsRouter = require('./controllers/cards')
 const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
@@ -26,6 +28,8 @@ app.use(middleware.requestLogger)
 
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
+app.use('/api/decks', decksRouter)
+app.use('/api/cards', cardsRouter)
 
 if (process.env.NODE_ENV === 'test') {
   const testingRouter = require('./controllers/testing')
