@@ -1,5 +1,6 @@
 const User = require('../models/user')
 const Deck = require('../models/deck')
+const Card = require('../models/card')
 
 const initialUsers = [
   {
@@ -26,9 +27,26 @@ const decksInDb = async () => {
   return decks.map((d) => d.toJSON())
 }
 
+const cardsInDb = async () => {
+  const cards = await Card.find({})
+  return cards.map((c) => c.toJSON())
+}
+
 const getUserId = async (username) => {
   const users = await User.find({})
   return users.find((user) => user.username === username)
 }
 
-module.exports = { initialUsers, usersInDb, decksInDb, getUserId }
+const getDeckId = async (name) => {
+  const decks = await Deck.find({})
+  return decks.find((deck) => deck.name === name)
+}
+
+module.exports = {
+  initialUsers,
+  usersInDb,
+  decksInDb,
+  cardsInDb,
+  getUserId,
+  getDeckId,
+}

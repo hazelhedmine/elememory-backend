@@ -11,22 +11,39 @@ cardsRouter.get('/', async (request, response) => {
 })
 
 cardsRouter.post('/', async (request, response) => {
-  const body = request.body
+  const { question, answer, deckId } = request.body
 
-  const deck = await Deck.findById(body.deckId)
+  if (!question) {
+    return response.status(400).json({
+      error: 'missing question',
+    })
+  }
+
+  if (!answer) {
+    return response.status(400).json({
+      error: 'missing answer',
+    })
+  }
+
+  if (!deckId) {
+    return response.status(400).json({
+      error: 'missing deck ID',
+    })
+  }
+
+  const deck = await Deck.findById(deckId)
 
   const card = new Card({
-    question: body.question,
-    answer: body.answer,
-    deck: deck._id,
+    question: question,
+    answer: answer,
+    deckId: deck._id,
   })
 
   const savedCard = await card.save()
-  // id of deck is stored in decks field
   deck.cards = deck.cards.concat(savedCard._id)
   await deck.save()
 
-  response.json(savedCard)
+  response.status(201).json(savedCard)
 })
 
 cardsRouter.put('/:id', async (request, response) => {

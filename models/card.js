@@ -9,7 +9,7 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  deck: {
+  deckId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Deck',
     required: true,
