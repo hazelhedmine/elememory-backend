@@ -66,6 +66,60 @@ describe('when there is initially one user in db', () => {
     const usersAtEnd = await helper.usersInDb()
     expect(usersAtEnd).toEqual(usersAtStart)
   })
+
+  test('user can be deleted', async () => {
+    const userToDelete = (await helper.usersInDb())[0]
+
+    await api.delete(`/api/users/${userToDelete.id}`).expect(204)
+
+    const usersAtEnd = await helper.decksInDb()
+    expect(usersAtEnd).toHaveLength(0)
+  })
+
+  test('user can update first name', async () => {
+    const userToUpdate = (await helper.usersInDb())[0]
+    expect(userToUpdate.username).toBe('root')
+    const editedUser = {
+      ...userToUpdate,
+      firstName: 'new first name',
+    }
+
+    await api.put(`/api/users/${userToUpdate.id}`).send(editedUser).expect(200)
+
+    const usersAtEnd = await helper.usersInDb()
+    const user = usersAtEnd.find((u) => u.id === userToUpdate.id)
+    expect(user.firstName).toBe('new first name')
+  })
+
+  test('user can update last name', async () => {
+    const userToUpdate = (await helper.usersInDb())[0]
+    expect(userToUpdate.username).toBe('root')
+    const editedUser = {
+      ...userToUpdate,
+      lastName: 'new last name',
+    }
+
+    await api.put(`/api/users/${userToUpdate.id}`).send(editedUser).expect(200)
+
+    const usersAtEnd = await helper.usersInDb()
+    const user = usersAtEnd.find((u) => u.id === userToUpdate.id)
+    expect(user.lastName).toBe('new last name')
+  })
+
+  test('user cannot update username', async () => {
+    const userToUpdate = (await helper.usersInDb())[0]
+    expect(userToUpdate.username).toBe('root')
+    const editedUser = {
+      ...userToUpdate,
+      username: 'newusername',
+    }
+
+    await api.put(`/api/users/${userToUpdate.id}`).send(editedUser).expect(400)
+
+    const usersAtEnd = await helper.usersInDb()
+    const user = usersAtEnd.find((u) => u.id === userToUpdate.id)
+    expect(user.username).toBe('root')
+  })
 })
 
 describe('when creating a new user', () => {
