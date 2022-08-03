@@ -131,6 +131,52 @@ describe('when there is initially a deck', () => {
   })
 })
 
+describe('when there are many decks', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+    await Deck.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({
+      username: 'root',
+      firstName: 'super',
+      lastName: 'user',
+      passwordHash,
+    })
+    await user.save()
+
+    const savedUser = await helper.getUserId('root')
+
+    const initialDecks = await helper.initialDecks
+
+    for (const deck of initialDecks) {
+      const newDeck = {
+        ...deck,
+        userId: savedUser.id, //_id will give ObjectId object
+      }
+
+      await api
+        .post('/api/decks')
+        .send(newDeck)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+    }
+  })
+
+  test('decks under a deleted user will be deleted', async () => {
+    const decksAtStart = await helper.decksInDb()
+    expect(decksAtStart).toHaveLength(helper.initialDecks.length)
+
+    const userToDelete = (await helper.usersInDb())[0]
+    await api.delete(`/api/users/${userToDelete.id}`).expect(204)
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(0)
+
+    const decksAtEnd = await helper.decksInDb()
+    expect(decksAtEnd).toHaveLength(0)
+  })
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })

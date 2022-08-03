@@ -17,6 +17,18 @@ const initialUsers = [
   },
 ]
 
+const initialDecks = [
+  {
+    name: 'deck1',
+  },
+  {
+    name: 'deck2',
+  },
+  {
+    name: 'deck3',
+  },
+]
+
 const initialCards = [
   {
     question: 'card1q',
@@ -68,6 +80,7 @@ const getDeckId = async (name) => {
 module.exports = {
   initialUsers,
   initialCards,
+  initialDecks,
   usersInDb,
   decksInDb,
   cardsInDb,

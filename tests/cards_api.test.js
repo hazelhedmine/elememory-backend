@@ -27,7 +27,7 @@ describe('when a user creates a card', () => {
 
     const newDeck = {
       name: 'initial deck',
-      userId: savedUser._id,
+      userId: savedUser.id,
     }
 
     await api
@@ -137,7 +137,7 @@ describe('when there is initially a card', () => {
 
     const newDeck = {
       name: 'initial deck',
-      userId: savedUser._id,
+      userId: savedUser.id,
     }
 
     await api
@@ -155,7 +155,7 @@ describe('when there is initially a card', () => {
     const newCard = {
       question: 'initial question',
       answer: 'initial answer',
-      deckId: deck._id,
+      deckId: deck.id,
     }
 
     await api
@@ -195,9 +195,10 @@ describe('when there is initially a card', () => {
 })
 
 describe('when there are many cards', () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     await User.deleteMany({})
     await Deck.deleteMany({})
+    await Card.deleteMany({})
 
     const passwordHash = await bcrypt.hash('sekret', 10)
     const user = new User({
@@ -212,7 +213,7 @@ describe('when there are many cards', () => {
 
     const newDeck = {
       name: 'initial deck',
-      userId: savedUser._id,
+      userId: savedUser.id,
     }
 
     await api
@@ -220,10 +221,6 @@ describe('when there are many cards', () => {
       .send(newDeck)
       .expect(201)
       .expect('Content-Type', /application\/json/)
-  })
-
-  beforeEach(async () => {
-    await Card.deleteMany({})
 
     const deck = await helper.getDeckId('initial deck')
 
@@ -232,7 +229,7 @@ describe('when there are many cards', () => {
     for (const card of initialCards) {
       const newCard = {
         ...card,
-        deckId: deck._id,
+        deckId: deck.id, //_id will give ObjectId object
       }
 
       await api
@@ -251,6 +248,17 @@ describe('when there are many cards', () => {
     await api.delete(`/api/decks/${deckToDelete.id}`).expect(204)
     const decksAtEnd = await helper.decksInDb()
     expect(decksAtEnd).toHaveLength(0)
+
+    const cardsAtEnd = await helper.cardsInDb()
+    expect(cardsAtEnd).toHaveLength(0)
+  })
+
+  test('cards under a deleted user will be deleted', async () => {
+    const cardsAtStart = await helper.cardsInDb()
+    expect(cardsAtStart).toHaveLength(helper.initialCards.length)
+
+    const userToDelete = (await helper.usersInDb())[0]
+    await api.delete(`/api/users/${userToDelete.id}`).expect(204)
 
     const cardsAtEnd = await helper.cardsInDb()
     expect(cardsAtEnd).toHaveLength(0)
