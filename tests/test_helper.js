@@ -17,6 +17,29 @@ const initialUsers = [
   },
 ]
 
+const initialCards = [
+  {
+    question: 'card1q',
+    answer: 'card1a',
+  },
+  {
+    question: 'card2q',
+    answer: 'card2a',
+  },
+  {
+    question: 'card3q',
+    answer: 'card3',
+  },
+  {
+    question: 'card4q',
+    answer: 'card4a',
+  },
+  {
+    question: 'card5q',
+    answer: 'card5a',
+  },
+]
+
 const usersInDb = async () => {
   const users = await User.find({})
   return users.map((u) => u.toJSON())
@@ -44,6 +67,7 @@ const getDeckId = async (name) => {
 
 module.exports = {
   initialUsers,
+  initialCards,
   usersInDb,
   decksInDb,
   cardsInDb,

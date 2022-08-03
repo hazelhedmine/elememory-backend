@@ -194,6 +194,69 @@ describe('when there is initially a card', () => {
   })
 })
 
+describe('when there are many cards', () => {
+  beforeAll(async () => {
+    await User.deleteMany({})
+    await Deck.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({
+      username: 'root',
+      firstName: 'super',
+      lastName: 'user',
+      passwordHash,
+    })
+    await user.save()
+
+    const savedUser = await helper.getUserId('root')
+
+    const newDeck = {
+      name: 'initial deck',
+      userId: savedUser._id,
+    }
+
+    await api
+      .post('/api/decks')
+      .send(newDeck)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+  })
+
+  beforeEach(async () => {
+    await Card.deleteMany({})
+
+    const deck = await helper.getDeckId('initial deck')
+
+    const initialCards = await helper.initialCards
+
+    for (const card of initialCards) {
+      const newCard = {
+        ...card,
+        deckId: deck._id,
+      }
+
+      await api
+        .post('/api/cards')
+        .send(newCard)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+    }
+  })
+
+  test('cards under a deleted deck will be deleted', async () => {
+    const cardsAtStart = await helper.cardsInDb()
+    expect(cardsAtStart).toHaveLength(helper.initialCards.length)
+
+    const deckToDelete = (await helper.decksInDb())[0]
+    await api.delete(`/api/decks/${deckToDelete.id}`).expect(204)
+    const decksAtEnd = await helper.decksInDb()
+    expect(decksAtEnd).toHaveLength(0)
+
+    const cardsAtEnd = await helper.cardsInDb()
+    expect(cardsAtEnd).toHaveLength(0)
+  })
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })

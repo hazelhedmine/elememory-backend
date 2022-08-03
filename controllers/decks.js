@@ -1,6 +1,7 @@
 const decksRouter = require('express').Router()
 const Deck = require('../models/deck')
 const User = require('../models/user')
+const Card = require('../models/card')
 
 decksRouter.get('/', async (request, response) => {
   const decks = await Deck.find({})
@@ -58,6 +59,8 @@ decksRouter.delete('/:id', async (request, response) => {
     return response.status(204).end()
   }
 
+  await Card.deleteMany({ deckId: request.params.id })
+
   await Deck.findByIdAndRemove(request.params.id)
   // await Deck.deleteOne({ _id: request.params.id })
 
@@ -65,7 +68,8 @@ decksRouter.delete('/:id', async (request, response) => {
 })
 
 // to delete all cards referencing deleted deck
-// Deck.pre('deleteOne', function (next) {
+// doesnt work
+// Deck.pre('findByIdAndRemove', function (next) {
 //   const deck = this
 //   deck.model('Card').deleteMany({ deck: deck._id }, next)
 // })
