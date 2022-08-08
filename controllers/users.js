@@ -54,13 +54,19 @@ usersRouter.put('/:id', async (request, response) => {
     })
   }
 
-  const updatedUser = await User.findByIdAndUpdate(request.params.id, user, {
+  await User.findByIdAndUpdate(request.params.id, user, {
     new: true,
     runValidators: true,
     context: 'query',
   })
 
-  response.json(updatedUser)
+  response.json({
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    password: user.password,
+    id: request.params.id,
+  })
 })
 
 usersRouter.delete('/:id', async (request, response) => {
