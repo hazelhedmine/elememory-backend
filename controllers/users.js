@@ -1,13 +1,32 @@
+const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
 const User = require('../models/user')
 const Card = require('../models/card')
 const Deck = require('../models/deck')
 
-usersRouter.get('/', async (request, response) => {
-  const users = await User.find({}).populate('decks', { name: 1 })
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization')
 
-  response.json(users)
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7)
+  }
+  return null
+}
+
+usersRouter.get('/:id', async (request, response) => {
+  const token = getTokenFrom(request)
+  // check validity of token
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+  const user = await User.find({ id: request.params.id }).populate('decks', {
+    name: 1,
+    id: 1,
+  })
+
+  response.json(user)
 })
 
 usersRouter.post('/', async (request, response, next) => {
