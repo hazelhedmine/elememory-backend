@@ -3,12 +3,22 @@ const Deck = require('../models/deck')
 const User = require('../models/user')
 const Card = require('../models/card')
 
-decksRouter.get('/', async (request, response) => {
-  const decks = await Deck.find({})
-    .populate('user', { username: 1 })
-    .populate('cards', { question: 1, answer: 1 })
+// decksRouter.get('/', async (request, response) => {
+//   const decks = await Deck.find({})
+//     .populate('user', { username: 1 })
+//     .populate('cards', { question: 1, answer: 1 })
 
-  response.json(decks)
+//   response.json(decks)
+// })
+
+decksRouter.get('/:id', async (request, response) => {
+  const deck = await Deck.findById(request.params.id).populate('cards', {
+    question: 1,
+    answer: 1,
+    id: 1,
+  })
+  console.log('deck :>> ', deck)
+  response.json(deck)
 })
 
 decksRouter.post('/', async (request, response) => {
@@ -42,15 +52,20 @@ decksRouter.post('/', async (request, response) => {
 })
 
 decksRouter.put('/:id', async (request, response) => {
+  //TODO: validation checking, such as empty field etc
   const deck = request.body
-
-  const updatedDeck = await Deck.findByIdAndUpdate(request.params.id, deck, {
-    new: true,
-    runValidators: true,
-    context: 'query',
-  })
-
-  response.json(updatedDeck)
+  try {
+    const updatedDeck = await Deck.findByIdAndUpdate(request.params.id, deck, {
+      new: true,
+      runValidators: true,
+      context: 'query',
+    })
+    console.log('updatedDeck :>> ', updatedDeck)
+    return response.status(200).json({ message: 'Successfully updated' })
+  } catch (exception) {
+    console.log('exception :>> ', exception)
+    return response.status(400).json({ message: 'Validation failed' })
+  }
 })
 
 decksRouter.delete('/:id', async (request, response) => {

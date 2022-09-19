@@ -21,11 +21,11 @@ usersRouter.get('/:id', async (request, response) => {
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
-  const user = await User.find({ id: request.params.id }).populate('decks', {
+  const user = await User.findById(request.params.id).populate('decks', {
     name: 1,
     id: 1,
   })
-
+  console.log('user :>> ', user)
   response.json(user)
 })
 
