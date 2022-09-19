@@ -69,17 +69,22 @@ decksRouter.put('/:id', async (request, response) => {
 })
 
 decksRouter.delete('/:id', async (request, response) => {
-  const deckToDelete = await Deck.findById(request.params.id)
-  if (!deckToDelete) {
-    return response.status(204).end()
+  try {
+    const deckToDelete = await Deck.findById(request.params.id)
+    if (!deckToDelete) {
+      return response.status(204).end()
+    }
+
+    await Card.deleteMany({ deckId: request.params.id })
+
+    await Deck.findByIdAndRemove(request.params.id)
+    // await Deck.deleteOne({ _id: request.params.id })
+
+    response.status(204).end()
+  } catch (exception) {
+    console.log('exception :>> ', exception)
+    return response.status(500).json({ message: 'Deletion failed' })
   }
-
-  await Card.deleteMany({ deckId: request.params.id })
-
-  await Deck.findByIdAndRemove(request.params.id)
-  // await Deck.deleteOne({ _id: request.params.id })
-
-  response.status(204).end()
 })
 
 // to delete all cards referencing deleted deck
